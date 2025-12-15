@@ -86,10 +86,82 @@ namespace CurrencyApp.Controllers
             }
         }
 
-        // Çıkış Yapma (Logout)
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Register(User model)
+        {
+            // Not: ID Number ve Phone unique olmalı, veritabanı hata verirse catch yakalar.
+            if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
+            {
+                ViewBag.Error = "Please fill the required fiedls!";
+                return View(model);
+            }
+
+            try
+            {
+                using (var connection = _dbHelper.GetConnection())
+                {
+                    connection.Open();
+
+                    // SQL INSERT Sorgusu
+                    // Not: Role, Status ve DefaultCurrencyCode veritabanında varsayılan (DEFAULT) değere sahip.
+                    // Bu yüzden onları göndermiyoruz, veritabanı otomatik atayacak.
+                    // Veritabanı otomatik olarak Cüzdan da oluşturacak (Trigger sayesinde).
+                    string sql = @"INSERT INTO ""User"" 
+                                  (""name"", ""surname"", ""phoneNumber"", ""address"", ""identityNumber"", ""password"", ""email"", ""birthDate"") 
+                                  VALUES 
+                                  (@name, @surname, @phone, @address, @identity, @pass, @email, @bdate)";
+
+                    using (var cmd = new NpgsqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@name", model.Name);
+                        cmd.Parameters.AddWithValue("@surname", model.Surname);
+                        cmd.Parameters.AddWithValue("@phone", model.PhoneNumber);
+                        cmd.Parameters.AddWithValue("@address", model.Address);
+                        cmd.Parameters.AddWithValue("@identity", model.IdentityNumber);
+                        cmd.Parameters.AddWithValue("@pass", model.Password); // Without Hashing
+                        cmd.Parameters.AddWithValue("@email", model.Email);
+                        cmd.Parameters.AddWithValue("@bdate", model.BirthDate);
+
+                        cmd.ExecuteNonQuery(); // Ekleme işlemini çalıştır
+                    }
+                }
+
+                // Kayıt başarılıysa Login sayfasına yönlendir
+                // TempData ile mesaj taşıyabiliriz
+                TempData["Success"] = "Registering is succesfull! You can login.";
+                return RedirectToAction("Login");
+            }
+            catch (PostgresException ex)
+            {
+                // Veritabanı hatalarını yakala (Örn: Aynı email/TC ile kayıt olma)
+                if (ex.SqlState == "23505") // Unique violation kodu
+                {
+                    ViewBag.Error = "Bu E-mail, Telefon veya TC Kimlik zaten kayıtlı!";
+                }
+                else
+                {
+                    ViewBag.Error = "Veritabanı hatası: " + ex.Message;
+                }
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "ERROR: " + ex.Message;
+                return View(model);
+            }
+        }
+
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear(); // Tüm oturum bilgilerini sil
+            // Session'ı temizle (Giriş bilgisini sil)
+            HttpContext.Session.Clear();
+            
+            // Login sayfasına at
             return RedirectToAction("Login");
         }
     }
