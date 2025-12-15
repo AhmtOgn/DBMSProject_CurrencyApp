@@ -193,3 +193,4 @@ D:\repos\Semester 3\DBMS\CurrencyApp\obj\Debug\net9.0\refint\CurrencyApp.dll
 D:\repos\Semester 3\DBMS\CurrencyApp\obj\Debug\net9.0\CurrencyApp.pdb
 D:\repos\Semester 3\DBMS\CurrencyApp\obj\Debug\net9.0\CurrencyApp.genruntimeconfig.cache
 D:\repos\Semester 3\DBMS\CurrencyApp\obj\Debug\net9.0\ref\CurrencyApp.dll
+D:\repos\Semester 3\DBMS\CurrencyApp\obj\Debug\net9.0\CurrencyApp.sourcelink.json

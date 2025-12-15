@@ -10,6 +10,6 @@ namespace CurrencyApp.Models
         public decimal High { get; set; }
         public decimal Low { get; set; }
         public int CurrencyPairId { get; set; } // FK
-        public DateTime Date { get; set; } = DateTime.Now();
+        public DateTime Date { get; set; } = DateTime.Now;
     }
 }

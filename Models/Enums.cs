@@ -4,14 +4,14 @@ namespace CurrencyApp.Models
     {
         User,
         Admin
-    }
+    };
     
     public enum UserStatus
     {
         NonValid,
         ValidPhone,
         ValidID
-    }
+    };
 
     public enum OperationType
     {
@@ -19,13 +19,13 @@ namespace CurrencyApp.Models
         Buy,
         Deposit,
         Withdrawal
-    }
+    };
 
     public enum OrderType
     {
         Market,
         Limit
-    }
+    };
 
     public enum ProcessStatus
     {
@@ -35,9 +35,9 @@ namespace CurrencyApp.Models
         Completed,
         Cancelled,
         Expired
-    }
+    };
 
-    public enum TableNames
+    public enum TableName
     {
         User,
         AuiditLog,
@@ -51,5 +51,5 @@ namespace CurrencyApp.Models
         MarketOrder,
         LimitOrder,
         Transaction
-    }
+    };
 }

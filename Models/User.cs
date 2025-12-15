@@ -11,8 +11,8 @@ namespace CurrencyApp.Models
         public string Password { get; set; } = "";
         public string Email { get; set; } = ""; // Email must be in mail format // U
         public DateTime BirthDate { get; set; } // User must be older than 18 years
-        public UserStatus MembershipStatus { get; set; } = "NonValid"; // (NonValid, ValidPhone, ValidId)
-        public string UserRole { get; set; } = "User"; // (User, Admin)
+        public UserStatus MembershipStatus { get; set; } = UserStatus.NonValid; // (NonValid, ValidPhone, ValidId)
+        public UserRole Role { get; set; } = UserRole.User; // (User, Admin)
         public string DefaultCurrencyCode { get; set; } = "USD";
     }
 }

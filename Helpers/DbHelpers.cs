@@ -6,11 +6,13 @@ namespace CurrencyApp.Helpers
 {
     public class DbHelper
     {
-        private readonly string _connectionString;
+        // "string?" yaparak null olabilir dedik veya default değer atadık
+        private readonly string _connectionString = "";
 
         public DbHelper(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            // Eğer connection string null gelirse boş string ata ki patlamasın
+            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? "";
         }
 
         public NpgsqlConnection GetConnection()
