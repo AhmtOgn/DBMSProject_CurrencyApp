@@ -56,15 +56,18 @@ namespace CurrencyApp.Controllers
                                 int userId = reader.GetInt32(reader.GetOrdinal("userId"));
                                 string name = reader.GetString(reader.GetOrdinal("name"));
                                 string surname = reader.GetString(reader.GetOrdinal("surname"));
-                                string role = "User"; // Varsayılan
 
                                 // Enum verisini string olarak çekelim (role kolonu enum olduğu için GetString çalışmayabilir, object alıp stringe çevirelim)
                                 object roleObj = reader["role"];
-                                if(roleObj != null) role = roleObj.ToString();
+                                string role = roleObj != null? role = roleObj.ToString()! : "User";
+
+                                object currencyObj = reader["defaultCurrencyCode"];
+                                string currency = currencyObj != null ? currencyObj.ToString()! : "USD";
 
                                 HttpContext.Session.SetInt32("UserId", userId);
                                 HttpContext.Session.SetString("UserName", $"{name} {surname}");
                                 HttpContext.Session.SetString("UserRole", role);
+                                HttpContext.Session.SetString("UserCurrency", currency);
 
                                 // 2. Ana Sayfaya Yönlendir
                                 return RedirectToAction("Index", "Home");

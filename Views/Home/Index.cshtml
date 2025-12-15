@@ -1,8 +1,89 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<CurrencyApp.Models.Wallet>
+
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row mt-4">
+    <div class="col-md-4 mb-4">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fa-solid fa-wallet"></i> Total Assets</h5>
+                <p class="card-text opacity-75">Approximate value of all wallets</p>
+                <h2 class="display-4 fw-bold">
+                    @ViewBag.TotalBalance.ToString("N2") <span class="fs-4">@ViewBag.Currency</span>
+                </h2>
+                <hr class="border-light" />
+                <div class="d-grid gap-2">
+                    <a asp-controller="Bank" asp-action="Index" class="btn btn-light text-primary fw-bold">
+                        <i class="fa-solid fa-plus-circle"></i> Deposit Money
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card text-center py-4 h-100">
+                    <div class="card-body">
+                        <i class="fa-solid fa-chart-line fa-3x text-success mb-3"></i>
+                        <h5>Markets</h5>
+                        <p class="text-muted">Track live rates and trade.</p>
+                        <a asp-controller="Market" asp-action="Index" class="btn btn-outline-success">Go to Markets</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-center py-4 h-100">
+                    <div class="card-body">
+                        <i class="fa-solid fa-arrow-right-arrow-left fa-3x text-warning mb-3"></i>
+                        <h5>Transfers</h5>
+                        <p class="text-muted">View past transaction history.</p>
+                        <a href="#" class="btn btn-outline-warning">History</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-white fw-bold">
+                <i class="fa-solid fa-coins"></i> My Assets (Summary)
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Wallet Name</th>
+                            <th class="text-end">Amount</th>
+                            <th class="text-center">Currency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            @foreach (var wallet in Model)
+                            {
+                                <tr>
+                                    <td>@wallet.WalletName</td>
+                                    <td class="text-end fw-bold">@wallet.Balance.ToString("N2")</td>
+                                    <td class="text-center"><span class="badge bg-secondary">@wallet.CurrencyCode</span></td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">You have no balance yet.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-center bg-white">
+                <a asp-controller="Wallet" asp-action="Index" class="text-decoration-none">View All Wallets &rarr;</a>
+            </div>
+        </div>
+    </div>
 </div>
