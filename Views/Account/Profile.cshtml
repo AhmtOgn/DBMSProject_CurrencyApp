@@ -1,0 +1,150 @@
+@model CurrencyApp.Models.User
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="fa-solid fa-user-pen text-primary"></i> Edit Profile</h4>
+            </div>
+            <div class="card-body">
+                
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">@TempData["Success"]</div>
+                }
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger">@ViewBag.Error</div>
+                }
+
+                <div id="noChangesAlert" class="alert alert-warning" style="display: none;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> No changes were made to your profile.
+                </div>
+
+                <form asp-action="Profile" method="post" id="profileForm">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Identity Number (Cannot be changed)</label>
+                            <input type="text" class="form-control bg-light" value="@Model.IdentityNumber" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Email (Cannot be changed)</label>
+                            <input type="email" class="form-control bg-light" value="@Model.Email" readonly />
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="Name" class="form-control track-change" value="@Model.Name" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Surname</label>
+                            <input type="text" name="Surname" class="form-control track-change" value="@Model.Surname" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" name="PhoneNumber" class="form-control track-change" value="@Model.PhoneNumber" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="text" name="Password" class="form-control track-change" value="@Model.Password" required />
+                        <small class="text-muted">Enter a new password to change it.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Default Currency</label>
+                        <select name="DefaultCurrencyCode" class="form-select track-change">      
+                        @if (ViewBag.Currencies != null)
+                        {
+                            foreach (var currency in (List<CurrencyApp.Models.Currency>)ViewBag.Currencies)
+                            {
+                                if (Model.DefaultCurrencyCode == currency.CurrencyCode)
+                                {
+                                    <option value="@currency.CurrencyCode" selected>
+                                        @currency.CurrencyCode - @currency.CurrencyName
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@currency.CurrencyCode">
+                                        @currency.CurrencyCode - @currency.CurrencyName
+                                    </option>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <option value="USD">USD (Default)</option>
+                        }
+
+                    </select>
+                        <small class="text-muted">Your total assets on the dashboard will be calculated in this currency.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <textarea name="Address" class="form-control track-change" rows="3">@Model.Address</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-save"></i> Save Changes
+                        </button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.getElementById("profileForm");
+            const alertBox = document.getElementById("noChangesAlert");
+            
+            const inputs = document.querySelectorAll(".track-change");
+            
+            // İlk değerleri kaydet (trim yaparak boşlukları temizle)
+            let initialValues = {};
+            inputs.forEach(input => {
+                initialValues[input.name] = input.value.trim();
+            });
+
+            form.addEventListener("submit", function(event) {
+                let hasChanges = false;
+
+                inputs.forEach(input => {
+                    // Mevcut değeri al ve boşlukları temizle
+                    let currentValue = input.value.trim();
+
+                    if (currentValue !== initialValues[input.name]) {
+                        hasChanges = true;
+                    }
+                });
+
+                if (!hasChanges) {
+                    event.preventDefault(); // Durdur
+                    alertBox.style.display = "block"; // Uyarıyı aç
+                    window.scrollTo(0, 0); // Yukarı kaydır
+
+                    setTimeout(() => {
+                        alertBox.style.display = "none";
+                    }, 3000);
+                }
+            });
+        });
+    </script>
+}

@@ -167,5 +167,134 @@ namespace CurrencyApp.Controllers
             // Login sayfasına at
             return RedirectToAction("Login");
         }
+
+        // --- PROFİL DÜZENLEME (EDIT PROFILE) ---
+
+        // GET: Bilgileri Getir
+        // GET: Bilgileri Getir
+        public IActionResult Profile()
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login");
+
+            User currentUser = new User();
+            List<Currency> currencyList = new List<Currency>(); // Para birimlerini tutacak liste
+
+            try
+            {
+                using (var connection = _dbHelper.GetConnection())
+                {
+                    connection.Open();
+
+                    // 1. KULLANICI BİLGİLERİNİ ÇEK
+                    string userSql = @"SELECT * FROM ""User"" WHERE ""userId"" = @uid";
+                    using (var cmd = new NpgsqlCommand(userSql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@uid", userId);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                currentUser.UserId = reader.GetInt32(reader.GetOrdinal("userId"));
+                                currentUser.Name = reader.GetString(reader.GetOrdinal("name"));
+                                currentUser.Surname = reader.GetString(reader.GetOrdinal("surname"));
+                                currentUser.Email = reader.GetString(reader.GetOrdinal("email"));
+                                currentUser.PhoneNumber = reader.GetString(reader.GetOrdinal("phoneNumber"));
+                                currentUser.Address = reader.GetString(reader.GetOrdinal("address"));
+                                currentUser.IdentityNumber = reader.GetString(reader.GetOrdinal("identityNumber"));
+                                currentUser.Password = reader.GetString(reader.GetOrdinal("password"));
+                                currentUser.BirthDate = reader.GetDateTime(reader.GetOrdinal("birthDate"));
+                                
+                                // Default Currency'yi çekiyoruz
+                                currentUser.DefaultCurrencyCode = reader.GetString(reader.GetOrdinal("defaultCurrencyCode"));
+                            }
+                        }
+                    }
+
+                    // 2. PARA BİRİMLERİNİ ÇEK (Aynı bağlantıyı kullanıyoruz)
+                    // Önceki Reader kapandığı için yeni komut çalıştırabiliriz.
+                    string currencySql = @"SELECT ""currencyCode"", ""currencyName"" FROM ""Currency"" ORDER BY ""currencyCode"" ASC";
+                    using (var cmd = new NpgsqlCommand(currencySql, connection))
+                    {
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                currencyList.Add(new Currency
+                                {
+                                    CurrencyCode = reader.GetString(reader.GetOrdinal("currencyCode")),
+                                    CurrencyName = reader.GetString(reader.GetOrdinal("currencyName"))
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error fetching data: " + ex.Message;
+            }
+
+            // Listeyi View'a taşıyoruz
+            ViewBag.Currencies = currencyList;
+
+            return View(currentUser);
+        }
+
+        // POST: Bilgileri Güncelle
+        [HttpPost]
+        public IActionResult Profile(User model)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login");
+
+            try
+            {
+                using (var connection = _dbHelper.GetConnection())
+                {
+                    connection.Open();
+
+                    // SQL UPDATE Sorgusu (defaultCurrencyCode eklendi)
+                    string sql = @"UPDATE ""User"" 
+                                   SET ""name"" = @name, 
+                                       ""surname"" = @surname, 
+                                       ""phoneNumber"" = @phone, 
+                                       ""address"" = @addr, 
+                                       ""password"" = @pass,
+                                       ""defaultCurrencyCode"" = @currency
+                                   WHERE ""userId"" = @uid";
+
+                    using (var cmd = new NpgsqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@name", model.Name);
+                        cmd.Parameters.AddWithValue("@surname", model.Surname);
+                        cmd.Parameters.AddWithValue("@phone", model.PhoneNumber);
+                        cmd.Parameters.AddWithValue("@addr", model.Address ?? "");
+                        cmd.Parameters.AddWithValue("@pass", model.Password);
+                        
+                        // YENİ: Para birimini ekle
+                        cmd.Parameters.AddWithValue("@currency", model.DefaultCurrencyCode);
+                        
+                        cmd.Parameters.AddWithValue("@uid", userId);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                // 1. Session'daki İsim bilgisini güncelle
+                HttpContext.Session.SetString("UserName", $"{model.Name} {model.Surname}");
+                
+                // 2. YENİ: Session'daki Para Birimini Güncelle (Böylece Dashboard anında değişir)
+                HttpContext.Session.SetString("UserCurrency", model.DefaultCurrencyCode);
+
+                TempData["Success"] = "Profile updated successfully!";
+                return RedirectToAction("Index" , "Home");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Update failed: " + ex.Message;
+                return View(model);
+            }
+        }
     }
 }
