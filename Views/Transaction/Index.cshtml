@@ -1,4 +1,5 @@
 @model List<CurrencyApp.Models.Transaction>
+@using CurrencyApp.Models
 
 @{
     ViewData["Title"] = "Transaction History";
@@ -9,13 +10,12 @@
 
     <div class="card shadow-sm">
         <div class="card-body p-0">
-            <table class="table table-hover table-striped mb-0">
+            <table class="table table-hover table-striped mb-0 align-middle">
                 <thead class="bg-light">
                     <tr>
                         <th>Date</th>
                         <th>Operation</th>
-                        <th>Amount</th>
-                        <th>Status</th>
+                        <th>Details (Sent <i class="fa-solid fa-arrow-right"></i> Received)</th> <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,38 +27,46 @@
                                 <td>@item.Date.ToString("dd.MM.yyyy HH:mm")</td>
                                 <td>
                                     @if (item.OperationType == OperationType.Buy) {
-                                        <span class="badge bg-success">
-                                            <i class="fa-solid fa-arrow-down"></i> BUY @item.CurrencyCode
-                                        </span>
+                                        <span class="badge bg-success"><i class="fa-solid fa-arrow-down"></i> BUY</span>
                                     }
                                     else if (item.OperationType == OperationType.Sell) {
-                                        <span class="badge bg-danger">
-                                            <i class="fa-solid fa-arrow-up"></i> SELL @item.CurrencyCode
-                                        </span>
+                                        <span class="badge bg-danger"><i class="fa-solid fa-arrow-up"></i> SELL</span>
                                     }
                                     else if (item.OperationType == OperationType.Deposit) {
-                                        <span class="badge bg-primary">
-                                            <i class="fa-solid fa-plus"></i> DEPOSIT @item.CurrencyCode
-                                        </span>
+                                        <span class="badge bg-primary"><i class="fa-solid fa-plus"></i> DEPOSIT</span>
                                     }
                                     else if (item.OperationType == OperationType.Withdrawal) {
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="fa-solid fa-minus"></i> WITHDRAW @item.CurrencyCode
-                                        </span>
+                                        <span class="badge bg-warning text-dark"><i class="fa-solid fa-minus"></i> WITHDRAW</span>
                                     }
-                                    else {
-                                        <span class="badge bg-secondary">
-                                            @item.OperationType @item.CurrencyCode
+                                </td>
+                                
+                                <td>
+                                    @if (item.TargetAmount != null && item.TargetAmount > 0)
+                                    {
+                                        // TRADE İŞLEMİ (OK İŞARETLİ)
+                                        <div class="d-flex align-items-center">
+                                            <div class="text-danger fw-bold me-2">
+                                                -@item.Amount.ToString("N2") <small>@item.CurrencyCode</small>
+                                            </div>
+                                            <i class="fa-solid fa-arrow-right text-muted mx-2"></i>
+                                            <div class="text-success fw-bold ms-2">
+                                                +@item.TargetAmount?.ToString("N2") <small>@item.TargetCurrencyCode</small>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        // PARA YATIRMA/ÇEKME (TEK YÖNLÜ)
+                                        <span class="fw-bold">
+                                            @item.Amount.ToString("N2") <small>@item.CurrencyCode</small>
                                         </span>
                                     }
                                 </td>
-                                <td class="font-monospace fw-bold">
-                                    @item.Amount.ToString("N2") 
-                                </td>
+
                                 <td>
                                     @if(item.TransactionStatus == ProcessStatus.Completed)
                                     {
-                                        <span class="text-success"><i class="fa-solid fa-check"></i> Completed</span>
+                                        <span class="text-success"><i class="fa-solid fa-check-circle"></i> Completed</span>
                                     }
                                     else
                                     {

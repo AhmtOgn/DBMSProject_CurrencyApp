@@ -13,5 +13,7 @@ namespace CurrencyApp.Models
         
         //Extra
         public string? CurrencyCode { get; set; }
+        public decimal? TargetAmount { get; set; } // Cüzdana Giren (Received)
+        public string? TargetCurrencyCode { get; set; } // Giren Para Birimi
     }
 }
