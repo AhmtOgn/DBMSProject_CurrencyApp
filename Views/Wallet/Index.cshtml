@@ -1,0 +1,78 @@
+@model List<CurrencyApp.Models.Wallet>
+
+@{
+    ViewData["Title"] = "My Wallets";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fa-solid fa-wallet text-primary"></i> My Wallets</h2>
+        
+        <a asp-controller="Bank" asp-action="Index" class="btn btn-success">
+            <i class="fa-solid fa-circle-dollar-to-slot"></i> Deposit / Withdraw
+        </a>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <div class="row">
+        @if (Model != null && Model.Count > 0)
+        {
+            @foreach (var wallet in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                            <h5 class="mb-0 fw-bold text-secondary">@wallet.WalletName</h5>
+                            <span class="badge bg-primary">@wallet.CurrencyCode</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted text-uppercase">Available Balance</small>
+                                <h3 class="fw-bold text-dark">
+                                    @wallet.Balance.ToString("N2") <span class="fs-6 text-muted">@wallet.CurrencyCode</span>
+                                </h3>
+                            </div>
+
+                            @if (wallet.PendingBalance > 0)
+                            {
+                                <div class="alert alert-warning py-2 mb-0 d-flex align-items-center">
+                                    <i class="fa-solid fa-lock me-2"></i>
+                                    <div>
+                                        <small class="d-block fw-bold">Locked Amount</small>
+                                        <span>@wallet.PendingBalance.ToString("N2") @wallet.CurrencyCode</span>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted small">
+                                    <i class="fa-solid fa-check-circle text-success"></i> No pending transactions.
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer bg-light text-end">
+                            <a asp-controller="Market" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                                Go to Market <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center py-5">
+                    <i class="fa-solid fa-wallet fa-3x mb-3"></i>
+                    <h4>You don't have any wallets yet.</h4>
+                    <p>When you deposit money or make a trade, a wallet will be created automatically.</p>
+                    <a asp-controller="Bank" asp-action="Index" class="btn btn-primary mt-2">Make a Deposit</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
