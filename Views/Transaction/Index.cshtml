@@ -27,16 +27,29 @@
                                 <td>@item.Date.ToString("dd.MM.yyyy HH:mm")</td>
                                 <td>
                                     @if (item.OperationType == OperationType.Buy) {
-                                        <span class="badge bg-success"><i class="fa-solid fa-arrow-down"></i> BUY</span>
+                                        <span class="badge bg-success">
+                                            <i class="fa-solid fa-arrow-down"></i> BUY @item.CurrencyCode
+                                        </span>
                                     }
                                     else if (item.OperationType == OperationType.Sell) {
-                                        <span class="badge bg-danger"><i class="fa-solid fa-arrow-up"></i> SELL</span>
+                                        <span class="badge bg-danger">
+                                            <i class="fa-solid fa-arrow-up"></i> SELL @item.CurrencyCode
+                                        </span>
                                     }
                                     else if (item.OperationType == OperationType.Deposit) {
-                                        <span class="badge bg-primary"><i class="fa-solid fa-plus"></i> DEPOSIT</span>
+                                        <span class="badge bg-primary">
+                                            <i class="fa-solid fa-plus"></i> DEPOSIT @item.CurrencyCode
+                                        </span>
+                                    }
+                                    else if (item.OperationType == OperationType.Withdrawal) {
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fa-solid fa-minus"></i> WITHDRAW @item.CurrencyCode
+                                        </span>
                                     }
                                     else {
-                                        <span class="badge bg-secondary">@item.OperationType</span>
+                                        <span class="badge bg-secondary">
+                                            @item.OperationType @item.CurrencyCode
+                                        </span>
                                     }
                                 </td>
                                 <td class="font-monospace fw-bold">

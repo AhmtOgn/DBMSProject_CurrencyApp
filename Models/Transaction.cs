@@ -12,6 +12,6 @@ namespace CurrencyApp.Models
         public int? OrderId { get; set; } // FK
         
         //Extra
-        public string CurrencyCode { get; set; } = "";
+        public string? CurrencyCode { get; set; }
     }
 }

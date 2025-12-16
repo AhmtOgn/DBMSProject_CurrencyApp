@@ -49,19 +49,16 @@ namespace CurrencyApp.Controllers
                                 // Veritabanından string olarak okuyoruz
                                 string opString = reader.GetString(reader.GetOrdinal("operationType"));
                                 string statusString = reader.GetString(reader.GetOrdinal("transactionStatus"));
-                            
+
                                 transactions.Add(new Transaction
                                 {
                                     TransactionId = reader.GetInt32(reader.GetOrdinal("transactionId")),
                                     Date = reader.GetDateTime(reader.GetOrdinal("date")),
-                                    
-                                    // HATA DÜZELTME 1: Enum.Parse Kullanımı
-                                    // Gelen stringi (Örn: "Buy") Enum tipine (OperationType.Buy) çevirir.
                                     OperationType = Enum.Parse<OperationType>(opString),
                                     TransactionStatus = Enum.Parse<ProcessStatus>(statusString),
-                            
                                     Amount = reader.GetDecimal(reader.GetOrdinal("amount")),
-                                    OperationFee = reader.IsDBNull(reader.GetOrdinal("operationFee")) ? 0 : reader.GetDecimal(reader.GetOrdinal("operationFee"))
+                                    OperationFee = reader.IsDBNull(reader.GetOrdinal("operationFee")) ? 0 : reader.GetDecimal(reader.GetOrdinal("operationFee")),
+                                    CurrencyCode = reader.GetString(reader.GetOrdinal("currencyCode"))
                                 });
                             }
                         }
