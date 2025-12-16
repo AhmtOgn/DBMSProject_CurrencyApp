@@ -1,0 +1,80 @@
+@model List<CurrencyApp.Models.BankRequest>
+@using CurrencyApp.Models
+
+@{ ViewData["Title"] = "Admin Panel"; }
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3><i class="fa-solid fa-user-shield text-dark"></i> Admin Approval Panel</h3>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+    
+    @if (TempData["Success"] != null) { 
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div> 
+    }
+    @if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+    @if (ViewBag.Error != null) { <div class="alert alert-danger">@ViewBag.Error</div> }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover table-bordered mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th>User / Wallet</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th class="text-center" style="width: 200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var req in Model)
+                        {
+                            <tr>
+                                <td>@req.WalletName</td>
+                                <td>
+                                    @if(req.Direction == OperationType.Deposit) { 
+                                        <span class="badge bg-success">DEPOSIT</span> 
+                                    }
+                                    else { 
+                                        <span class="badge bg-danger">WITHDRAWAL</span> 
+                                    }
+                                </td>
+                                <td class="fw-bold fs-5">@req.Amount.ToString("N2")</td>
+                                <td class="text-muted small">@req.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td class="text-center">
+                                    <form asp-action="Approve" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@req.RequestId" />
+                                        <button class="btn btn-sm btn-success" title="Approve">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="Reject" method="post" class="d-inline ms-2">
+                                        <input type="hidden" name="id" value="@req.RequestId" />
+                                        <button class="btn btn-sm btn-danger" title="Reject">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-check-circle fa-2x mb-2 text-success"></i><br>
+                                No pending requests found. All caught up!
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -11,7 +11,8 @@ namespace CurrencyApp.Models
         public int WalletId { get; set; } // FK
         
         //Extra
-        public string BankName { get; set; } = ""; // Hangi bankadan?
-        public string UserName { get; set; } = ""; // Kim istemiş? (Admin paneli için)
+        public string? BankName { get; set; } // Hangi bankadan?
+        public string? WalletName { get; set; }
+        public string? UserName { get; set; } // Kim istemiş? (Admin paneli için)
     }
 }
