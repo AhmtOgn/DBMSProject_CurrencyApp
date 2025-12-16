@@ -1,0 +1,60 @@
+@model List<CurrencyApp.Models.CurrencyPair>
+
+@{
+    ViewData["Title"] = "Markets";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fa-solid fa-chart-line text-success"></i> Markets</h2>
+        <span class="text-muted">Live exchange rates</span>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Pair</th>
+                        <th class="text-end">Current Rate</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var pair in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">
+                                    <span class="text-primary">@pair.BaseCurrencyCode</span> / <span class="text-secondary">@pair.TargetCurrencyCode</span>
+                                </td>
+                                <td class="text-end font-monospace fs-5">
+                                    @pair.Rate.ToString("N4")
+                                </td>
+                                <td class="text-center">
+                                    <a asp-controller="Market" asp-action="Trade" asp-route-id="@pair.CurrencyPairId" class="btn btn-sm btn-outline-primary px-4 rounded-pill">
+                                        Trade <i class="fa-solid fa-arrow-right-arrow-left ms-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-muted">
+                                No market data available.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

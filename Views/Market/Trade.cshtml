@@ -1,0 +1,89 @@
+@model CurrencyApp.Models.CurrencyPair
+
+@{
+    ViewData["Title"] = "Trade " + Model.PairName;
+}
+
+<div class="container mt-4">
+    <a asp-action="Index" class="text-decoration-none text-muted mb-3 d-inline-block">
+        <i class="fa-solid fa-arrow-left"></i> Back to Markets
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0">
+                
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0 fw-bold">@Model.PairName</h4>
+                    <p class="mb-0 opacity-75 small">Current Rate: 1 @Model.BaseCurrencyCode = @Model.Rate.ToString("N4") @Model.TargetCurrencyCode</p>
+                </div>
+
+                <div class="card-body p-4">
+                    
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["Success"]</div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    <form asp-action="ExecuteTrade" method="post">
+                        
+                        <input type="hidden" name="currencyPairId" value="@Model.CurrencyPairId" />
+                        <input type="hidden" name="rate" value="@Model.Rate" />
+
+                        <div class="btn-group w-100 mb-4" role="group">
+                            <input type="radio" class="btn-check" name="operationType" id="buyOption" value="Buy" checked>
+                            <label class="btn btn-outline-success py-2" for="buyOption">
+                                <i class="fa-solid fa-arrow-down"></i> BUY @Model.BaseCurrencyCode
+                            </label>
+
+                            <input type="radio" class="btn-check" name="operationType" id="sellOption" value="Sell">
+                            <label class="btn btn-outline-danger py-2" for="sellOption">
+                                <i class="fa-solid fa-arrow-up"></i> SELL @Model.BaseCurrencyCode
+                            </label>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Amount (@Model.BaseCurrencyCode)</label>
+                            <div class="input-group input-group-lg">
+                                <input type="number" step="0.0001" min="0" name="amount" id="amountInput" class="form-control fw-bold" placeholder="0.00" required>
+                                <span class="input-group-text">@Model.BaseCurrencyCode</span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-light border text-center mb-4">
+                            <small class="text-muted d-block">Estimated Total</small>
+                            <h3 class="fw-bold mb-0 text-dark">
+                                <span id="totalPrice">0.00</span> 
+                                <span class="fs-6 text-muted">@Model.TargetCurrencyCode</span>
+                            </h3>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-lg shadow-sm">
+                            Confirm Transaction
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const rate = @Model.Rate.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        const input = document.getElementById('amountInput');
+        const display = document.getElementById('totalPrice');
+
+        input.addEventListener('input', function() {
+            let amount = parseFloat(this.value);
+            if(isNaN(amount)) amount = 0;
+            
+            let total = amount * rate;
+            display.innerText = total.toFixed(4);
+        });
+    </script>
+}
