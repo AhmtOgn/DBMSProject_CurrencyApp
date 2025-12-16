@@ -10,6 +10,14 @@
         <span class="text-muted">Live exchange rates</span>
     </div>
 
+    @if (TempData["Success"] != null)
+    {
+        <div id="autoCloseAlert" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
     @if (ViewBag.Error != null)
     {
         <div class="alert alert-danger">@ViewBag.Error</div>
@@ -58,3 +66,17 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var alertElement = document.getElementById("autoCloseAlert");
+            if (alertElement) {
+                setTimeout(function() {
+                    var bsAlert = new bootstrap.Alert(alertElement);
+                    bsAlert.close();
+                }, 3000); // 3000ms = 3 saniye
+            }
+        });
+    </script>
+}
