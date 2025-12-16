@@ -121,5 +121,53 @@ namespace CurrencyApp.Controllers
 
             return View(selectedPair);
         }
+
+        [HttpPost]
+        public IActionResult ExecuteTrade(int currencyPairId, string operationType, decimal amount)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Account");
+        
+            if (amount <= 0)
+            {
+                TempData["Error"] = "Amount must be greater than zero.";
+                return RedirectToAction("Trade", new { id = currencyPairId });
+            }
+        
+            try
+            {
+                using (var connection = _dbHelper.GetConnection())
+                {
+                    connection.Open();
+        
+                    // SQL Fonksiyonunu Çağırıyoruz
+                    // operationType veritabanında ENUM olduğu için Npgsql bunu string olarak gönderince otomatik eşleştirir.
+                    string sql = "SELECT \"executeTradeF\"(@uid, @pid, @op::operation_type, @amt)";
+        
+                    using (var cmd = new NpgsqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@uid", userId);
+                        cmd.Parameters.AddWithValue("@pid", currencyPairId);
+                        cmd.Parameters.AddWithValue("@op", operationType); // 'Buy' veya 'Sell'
+                        cmd.Parameters.AddWithValue("@amt", amount);
+        
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                
+                TempData["Success"] = "Transaction completed successfully!";
+            }
+            catch (PostgresException ex)
+            {
+                // Trigger'lardan gelen hataları (Yetersiz bakiye vb.) yakalar
+                TempData["Error"] = "Transaction failed: " + ex.MessageText;
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "System error: " + ex.Message;
+            }
+        
+            return RedirectToAction("Trade", new { id = currencyPairId });
+        }
     }
 }
