@@ -122,7 +122,7 @@ namespace CurrencyApp.Controllers
 
             if (amount <= 0)
             {
-                TempData["ERROR"] = "Amount must be greater than zero.";
+                TempData["MarketError"] = "Amount must be greater than zero.";
                 return RedirectToAction("Trade", new { id = currencyPairId });
             }
 
@@ -145,19 +145,19 @@ namespace CurrencyApp.Controllers
                     }
                 }
                 
-                TempData["Success"] = "Transaction completed successfully!";
+                TempData["MarketSuccess"] = "Transaction completed...";
                 
                 return RedirectToAction("Index");
             }
             catch (PostgresException ex)
             {
-                TempData["ERROR"] = "Transaction failed: " + ex.MessageText;
+                TempData["MarketError"] = "Transaction failed..." + ex.MessageText;
 
                 return RedirectToAction("Trade", new { id = currencyPairId });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "System error: " + ex.Message;
+                TempData["MarketError"] = "Transaction failed..." + ex.Message;
                 return RedirectToAction("Trade", new { id = currencyPairId });
             }
         }

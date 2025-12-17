@@ -10,10 +10,10 @@
         <span class="text-muted">Live exchange rates</span>
     </div>
 
-    @if (TempData["Success"] != null)
+    @if (TempData["MarketSuccess"] != null)
     {
         <div id="autoCloseAlert" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fa-solid fa-check-circle"></i> @TempData["Success"]
+            <i class="fa-solid fa-check-circle"></i> @TempData["MarketSuccess"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }

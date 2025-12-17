@@ -4,6 +4,15 @@
     ViewData["Title"] = "My Wallets";
 }
 
+@if (TempData["WalletError"] != null)
+{
+    <div class="alert alert-danger">@TempData["WalletError"]</div>
+}
+@if (TempData["WalletSuccess"] != null)
+{
+    <div class="alert alert-success">@TempData["WalletSuccess"]</div>
+}
+
 <div class="mb-4 text-end">
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createWalletModal">
         <i class="fa-solid fa-plus"></i> Create New Wallet

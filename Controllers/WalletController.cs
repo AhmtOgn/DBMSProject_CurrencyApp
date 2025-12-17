@@ -85,11 +85,11 @@ namespace CurrencyApp.Controllers
                         cmd.ExecuteNonQuery();
                     }
                 }
-                TempData["Success"] = "Wallet created successfully via DB Function!";
+                TempData["WalletSuccess"] = "Wallet created successfully...";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error: " + ex.Message;
+                TempData["WalletError"] = "Error: " + ex.Message;
             }
             return RedirectToAction("Index");
         }
@@ -115,11 +115,11 @@ namespace CurrencyApp.Controllers
                         cmd.ExecuteNonQuery();
                     }
                 }
-                TempData["Success"] = "Wallet deleted successfully.";
+                TempData["WalletSuccess"] = "Wallet deleted successfully...";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error: " + ex.Message;
+                TempData["WalletError"] = "Error: " + ex.Message;
             }
             return RedirectToAction("Index");
         }
