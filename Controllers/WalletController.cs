@@ -74,7 +74,7 @@ namespace CurrencyApp.Controllers
                 using (var connection = _dbHelper.GetConnection())
                 {
                     connection.Open();
-                    string sql = @"SELECT ""createWalletF""(@uid, @code, @name)";
+                    string sql = @"SELECT createWalletF (@uid, @code, @name)";
                     
                     using (var cmd = new NpgsqlCommand(sql, connection))
                     {
@@ -105,7 +105,7 @@ namespace CurrencyApp.Controllers
                 using (var connection = _dbHelper.GetConnection())
                 {
                     connection.Open();
-                    string sql = @"SELECT ""deleteWalletF""(@wid, @uid)";
+                    string sql = @"SELECT deleteWalletF (@wid, @uid)";
         
                     using (var cmd = new NpgsqlCommand(sql, connection))
                     {

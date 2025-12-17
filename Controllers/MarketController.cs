@@ -132,7 +132,7 @@ namespace CurrencyApp.Controllers
                 {
                     connection.Open();
 
-                    string sql = "SELECT \"executeTradeF\"(@uid, @pid, @op::operation_type, @amt)";
+                    string sql = "SELECT executeTradeF (@uid, @pid, @op::operation_type, @amt)";
 
                     using (var cmd = new NpgsqlCommand(sql, connection))
                     {
