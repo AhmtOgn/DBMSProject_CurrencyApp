@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using CurrencyApp.Helpers;
-using CurrencyApp.Models; // Transaction modelinin burada olduğundan emin ol
+using CurrencyApp.Models;
 using Npgsql;
 
 namespace CurrencyApp.Controllers
@@ -26,9 +26,6 @@ namespace CurrencyApp.Controllers
                 using (var connection = _dbHelper.GetConnection())
                 {
                     connection.Open();
-
-                    // SQL GÜNCELLEMESİ: Order, CurrencyPair ve Currency tablolarını JOIN yapıyoruz.
-                    // Amacımız: Karşı tarafın ne kadar olduğunu ve hangi para birimi olduğunu bulmak.
                     string sql = @"
                         SELECT t.*, 
                                wc.""currencyCode"" as SourceCode,
@@ -60,33 +57,27 @@ namespace CurrencyApp.Controllers
                                     TransactionId = reader.GetInt32(reader.GetOrdinal("transactionId")),
                                     Date = reader.GetDateTime(reader.GetOrdinal("date")),
                                     Amount = reader.GetDecimal(reader.GetOrdinal("amount")),
-                                    CurrencyCode = reader.GetString(reader.GetOrdinal("SourceCode")), // Cüzdandaki Para (Çıkan)
+                                    CurrencyCode = reader.GetString(reader.GetOrdinal("SourceCode")),
                                 };
 
-                                // Enum Dönüşümleri
                                 string opString = reader.GetString(reader.GetOrdinal("operationType"));
                                 trans.OperationType = Enum.Parse<OperationType>(opString);
                                 
                                 string statusString = reader.GetString(reader.GetOrdinal("transactionStatus"));
                                 trans.TransactionStatus = Enum.Parse<ProcessStatus>(statusString);
 
-                                // HEDEF PARA BİRİMİNİ VE MİKTARI BULMA MANTIĞI
                                 if (!reader.IsDBNull(reader.GetOrdinal("targetAmount")))
                                 {
                                     trans.TargetAmount = reader.GetDecimal(reader.GetOrdinal("targetAmount"));
                                     
-                                    // Eğer işlem bir Trade ise (Buy/Sell) karşı para birimini bul
                                     if (trans.OperationType == OperationType.Buy)
                                     {
-                                        // Buy işlemi: Target (TL) verdik, Base (EUR) aldık.
-                                        // WalletCode (Source) zaten TargetCode (TL) oluyor.
-                                        // Bize lazım olan TargetCurrencyCode -> BaseCode (EUR) olacak.
+                                        // BUY: Give TARGET, Get BASE
                                         trans.TargetCurrencyCode = reader.GetString(reader.GetOrdinal("BaseCode"));
                                     }
                                     else if (trans.OperationType == OperationType.Sell)
                                     {
-                                        // Sell işlemi: Base (EUR) verdik, Target (TL) aldık.
-                                        // Bize lazım olan TargetCurrencyCode -> TargetCode (TL) olacak.
+                                        // SELL: Give BASE, Get TARGET
                                         trans.TargetCurrencyCode = reader.GetString(reader.GetOrdinal("TargetCode"));
                                     }
                                 }
@@ -99,7 +90,7 @@ namespace CurrencyApp.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error loading history: " + ex.Message;
+                ViewBag.Error = "ERROR:" + ex.Message;
             }
 
             return View(transactions);

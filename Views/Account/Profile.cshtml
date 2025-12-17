@@ -117,7 +117,6 @@
             
             const inputs = document.querySelectorAll(".track-change");
             
-            // İlk değerleri kaydet (trim yaparak boşlukları temizle)
             let initialValues = {};
             inputs.forEach(input => {
                 initialValues[input.name] = input.value.trim();
@@ -127,7 +126,6 @@
                 let hasChanges = false;
 
                 inputs.forEach(input => {
-                    // Mevcut değeri al ve boşlukları temizle
                     let currentValue = input.value.trim();
 
                     if (currentValue !== initialValues[input.name]) {
@@ -136,9 +134,9 @@
                 });
 
                 if (!hasChanges) {
-                    event.preventDefault(); // Durdur
-                    alertBox.style.display = "block"; // Uyarıyı aç
-                    window.scrollTo(0, 0); // Yukarı kaydır
+                    event.preventDefault();
+                    alertBox.style.display = "block";
+                    window.scrollTo(0, 0);
 
                     setTimeout(() => {
                         alertBox.style.display = "none";

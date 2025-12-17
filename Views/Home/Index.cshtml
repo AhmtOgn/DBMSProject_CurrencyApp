@@ -19,7 +19,7 @@
         <div class="card bg-primary text-white h-100">
             <div class="card-body">
                 <h5 class="card-title"><i class="fa-solid fa-wallet"></i> Total Assets</h5>
-                <p class="card-text opacity-75">Approximate value of all wallets</p>
+                <p class="card-text opacity-75">Approximate total balance</p>
                 <h2 class="display-4 fw-bold">
                     @ViewBag.TotalBalance.ToString("N2") <span class="fs-4">@ViewBag.Currency</span>
                 </h2>
@@ -104,14 +104,10 @@
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Mesaj kutusunu bul
             var alertElement = document.getElementById("autoCloseAlert");
             
-            // Eğer mesaj kutusu varsa (yani TempData doluysa)
             if (alertElement) {
-                // 3 saniye (3000 milisaniye) sonra çalıştır
                 setTimeout(function() {
-                    // Bootstrap'ın kendi kapatma fonksiyonunu kullan (Fade effect ile kapatır)
                     var bsAlert = new bootstrap.Alert(alertElement);
                     bsAlert.close();
                 }, 3000);

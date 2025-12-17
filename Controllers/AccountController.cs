@@ -14,17 +14,14 @@ namespace CurrencyApp.Controllers
             _dbHelper = dbHelper;
         }
 
-        // GET: /Account/Login (Sayfayı Gösterir)
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: /Account/Login (Form Gönderilince Çalışır)
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
-            // Basit validasyon
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
                 ViewBag.Error = "Please Fill all the fileds!";
@@ -42,7 +39,6 @@ namespace CurrencyApp.Controllers
 
                     using (var cmd = new NpgsqlCommand(sql, connection))
                     {
-                        // SQL Injection önlemek için parametre kullanıyoruz
                         cmd.Parameters.AddWithValue("@pEmail", email);
                         cmd.Parameters.AddWithValue("@pPass", password); // Without Hashing
 
@@ -50,14 +46,10 @@ namespace CurrencyApp.Controllers
                         {
                             if (reader.Read())
                             {   
-                                // User was found
-                                // 1. Bilgileri Session'a Kaydet
-                                // Veritabanından gelen userId ve diğer bilgileri alıyoruz
                                 int userId = reader.GetInt32(reader.GetOrdinal("userId"));
                                 string name = reader.GetString(reader.GetOrdinal("name"));
                                 string surname = reader.GetString(reader.GetOrdinal("surname"));
 
-                                // Enum verisini string olarak çekelim (role kolonu enum olduğu için GetString çalışmayabilir, object alıp stringe çevirelim)
                                 object roleObj = reader["role"];
                                 string role = roleObj != null? role = roleObj.ToString()! : "User";
 
@@ -69,12 +61,10 @@ namespace CurrencyApp.Controllers
                                 HttpContext.Session.SetString("UserRole", role);
                                 HttpContext.Session.SetString("UserCurrency", currency);
 
-                                // 2. Ana Sayfaya Yönlendir
                                 return RedirectToAction("Index", "Home");
                             }
                             else
                             {
-                                // User wasn't found
                                 ViewBag.Error = "Incorrect Email or Password, please try again!";
                                 return View();
                             }
@@ -97,7 +87,6 @@ namespace CurrencyApp.Controllers
         [HttpPost]
         public IActionResult Register(User model)
         {
-            // Not: ID Number ve Phone unique olmalı, veritabanı hata verirse catch yakalar.
             if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
             {
                 ViewBag.Error = "Please fill the required fiedls!";
@@ -109,15 +98,8 @@ namespace CurrencyApp.Controllers
                 using (var connection = _dbHelper.GetConnection())
                 {
                     connection.Open();
-
-                    // SQL INSERT Sorgusu
-                    // Not: Role, Status ve DefaultCurrencyCode veritabanında varsayılan (DEFAULT) değere sahip.
-                    // Bu yüzden onları göndermiyoruz, veritabanı otomatik atayacak.
-                    // Veritabanı otomatik olarak Cüzdan da oluşturacak (Trigger sayesinde).
-                    string sql = @"INSERT INTO ""User"" 
-                                  (""name"", ""surname"", ""phoneNumber"", ""address"", ""identityNumber"", ""password"", ""email"", ""birthDate"") 
-                                  VALUES 
-                                  (@name, @surname, @phone, @address, @identity, @pass, @email, @bdate)";
+                    string sql = @"INSERT INTO ""User"" (""name"", ""surname"", ""phoneNumber"", ""address"", ""identityNumber"", ""password"", ""email"", ""birthDate"") 
+                                  VALUES (@name, @surname, @phone, @address, @identity, @pass, @email, @bdate)";
 
                     using (var cmd = new NpgsqlCommand(sql, connection))
                     {
@@ -134,21 +116,18 @@ namespace CurrencyApp.Controllers
                     }
                 }
 
-                // Kayıt başarılıysa Login sayfasına yönlendir
-                // TempData ile mesaj taşıyabiliriz
                 TempData["Success"] = "Registering is succesfull! You can login.";
                 return RedirectToAction("Login");
             }
             catch (PostgresException ex)
             {
-                // Veritabanı hatalarını yakala (Örn: Aynı email/TC ile kayıt olma)
-                if (ex.SqlState == "23505") // Unique violation kodu
+                if (ex.SqlState == "23505")
                 {
-                    ViewBag.Error = "Bu E-mail, Telefon veya TC Kimlik zaten kayıtlı!";
+                    ViewBag.Error = "This email, phone number or identity number are already exist!";
                 }
                 else
                 {
-                    ViewBag.Error = "Veritabanı hatası: " + ex.Message;
+                    ViewBag.Error = "DB.ERROR: " + ex.Message;
                 }
                 return View(model);
             }
@@ -161,24 +140,17 @@ namespace CurrencyApp.Controllers
 
         public IActionResult Logout()
         {
-            // Session'ı temizle (Giriş bilgisini sil)
             HttpContext.Session.Clear();
-            
-            // Login sayfasına at
             return RedirectToAction("Login");
         }
 
-        // --- PROFİL DÜZENLEME (EDIT PROFILE) ---
-
-        // GET: Bilgileri Getir
-        // GET: Bilgileri Getir
         public IActionResult Profile()
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login");
 
             User currentUser = new User();
-            List<Currency> currencyList = new List<Currency>(); // Para birimlerini tutacak liste
+            List<Currency> currencyList = new List<Currency>();
 
             try
             {
@@ -186,7 +158,6 @@ namespace CurrencyApp.Controllers
                 {
                     connection.Open();
 
-                    // 1. KULLANICI BİLGİLERİNİ ÇEK
                     string userSql = @"SELECT * FROM ""User"" WHERE ""userId"" = @uid";
                     using (var cmd = new NpgsqlCommand(userSql, connection))
                     {
@@ -204,15 +175,11 @@ namespace CurrencyApp.Controllers
                                 currentUser.IdentityNumber = reader.GetString(reader.GetOrdinal("identityNumber"));
                                 currentUser.Password = reader.GetString(reader.GetOrdinal("password"));
                                 currentUser.BirthDate = reader.GetDateTime(reader.GetOrdinal("birthDate"));
-                                
-                                // Default Currency'yi çekiyoruz
                                 currentUser.DefaultCurrencyCode = reader.GetString(reader.GetOrdinal("defaultCurrencyCode"));
                             }
                         }
                     }
 
-                    // 2. PARA BİRİMLERİNİ ÇEK (Aynı bağlantıyı kullanıyoruz)
-                    // Önceki Reader kapandığı için yeni komut çalıştırabiliriz.
                     string currencySql = @"SELECT ""currencyCode"", ""currencyName"" FROM ""Currency"" ORDER BY ""currencyCode"" ASC";
                     using (var cmd = new NpgsqlCommand(currencySql, connection))
                     {
@@ -235,13 +202,10 @@ namespace CurrencyApp.Controllers
                 ViewBag.Error = "Error fetching data: " + ex.Message;
             }
 
-            // Listeyi View'a taşıyoruz
             ViewBag.Currencies = currencyList;
-
             return View(currentUser);
         }
 
-        // POST: Bilgileri Güncelle
         [HttpPost]
         public IActionResult Profile(User model)
         {
@@ -253,8 +217,6 @@ namespace CurrencyApp.Controllers
                 using (var connection = _dbHelper.GetConnection())
                 {
                     connection.Open();
-
-                    // SQL UPDATE Sorgusu (defaultCurrencyCode eklendi)
                     string sql = @"UPDATE ""User"" 
                                    SET ""name"" = @name, 
                                        ""surname"" = @surname, 
@@ -271,20 +233,14 @@ namespace CurrencyApp.Controllers
                         cmd.Parameters.AddWithValue("@phone", model.PhoneNumber);
                         cmd.Parameters.AddWithValue("@addr", model.Address ?? "");
                         cmd.Parameters.AddWithValue("@pass", model.Password);
-                        
-                        // YENİ: Para birimini ekle
                         cmd.Parameters.AddWithValue("@currency", model.DefaultCurrencyCode);
-                        
                         cmd.Parameters.AddWithValue("@uid", userId);
 
                         cmd.ExecuteNonQuery();
                     }
                 }
 
-                // 1. Session'daki İsim bilgisini güncelle
                 HttpContext.Session.SetString("UserName", $"{model.Name} {model.Surname}");
-                
-                // 2. YENİ: Session'daki Para Birimini Güncelle (Böylece Dashboard anında değişir)
                 HttpContext.Session.SetString("UserCurrency", model.DefaultCurrencyCode);
 
                 TempData["Success"] = "Profile updated successfully!";
@@ -292,7 +248,7 @@ namespace CurrencyApp.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Update failed: " + ex.Message;
+                ViewBag.Error = "FAIL:" + ex.Message;
                 return View(model);
             }
         }

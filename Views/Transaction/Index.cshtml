@@ -43,7 +43,6 @@
                                 <td>
                                     @if (item.TargetAmount != null && item.TargetAmount > 0)
                                     {
-                                        // TRADE İŞLEMİ (OK İŞARETLİ)
                                         <div class="d-flex align-items-center">
                                             <div class="text-danger fw-bold me-2">
                                                 -@item.Amount.ToString("N2") <small>@item.CurrencyCode</small>
@@ -56,7 +55,6 @@
                                     }
                                     else
                                     {
-                                        // PARA YATIRMA/ÇEKME (TEK YÖNLÜ)
                                         <span class="fw-bold">
                                             @item.Amount.ToString("N2") <small>@item.CurrencyCode</small>
                                         </span>

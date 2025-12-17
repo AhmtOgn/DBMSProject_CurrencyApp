@@ -16,7 +16,6 @@ namespace CurrencyApp.Controllers
 
         public IActionResult Index()
         {
-            // Oturum Kontrolü
             int? userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Account");
 
@@ -27,10 +26,6 @@ namespace CurrencyApp.Controllers
                 using (var connection = _dbHelper.GetConnection())
                 {
                     connection.Open();
-
-                    // SQL JOIN SORGUSU
-                    // Wallet tablosundaki currencyId ile Currency tablosunu birleştiriyoruz.
-                    // Böylece "USD", "TRY" gibi kodları alabiliyoruz.
                     string sql = @"
                         SELECT w.*, c.""currencyCode"", c.""currencyName""
                         FROM ""Wallet"" w
@@ -51,9 +46,9 @@ namespace CurrencyApp.Controllers
                                     WalletId = reader.GetInt32(reader.GetOrdinal("walletId")),
                                     WalletName = reader.GetString(reader.GetOrdinal("walletName")),
                                     Balance = reader.GetDecimal(reader.GetOrdinal("balance")),
-                                    PendingBalance = reader.GetDecimal(reader.GetOrdinal("pendingBalance")), // Dondurulmuş Bakiye
+                                    PendingBalance = reader.GetDecimal(reader.GetOrdinal("pendingBalance")), 
                                     CurrencyId = reader.GetInt32(reader.GetOrdinal("currencyId")),
-                                    CurrencyCode = reader.GetString(reader.GetOrdinal("currencyCode")) // Modelde bu alan olmalı
+                                    CurrencyCode = reader.GetString(reader.GetOrdinal("currencyCode"))
                                 });
                             }
                         }
@@ -62,7 +57,7 @@ namespace CurrencyApp.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error loading wallets: " + ex.Message;
+                ViewBag.Error = "ERROR:" + ex.Message;
             }
 
             return View(myWallets);

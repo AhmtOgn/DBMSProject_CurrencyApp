@@ -17,7 +17,6 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        // Oturum kontrolü (Giriş yapmamışsa Login'e at)
         int? userId = HttpContext.Session.GetInt32("UserId");
         if (userId == null)
         {
@@ -33,25 +32,24 @@ public class HomeController : Controller
             {
                 connection.Open();
 
-                // 1. TOPLAM VARLIĞI HESAPLA (SQL Fonksiyonunu Çağır)
+                //Calculate total balance
                 using (var cmd = new NpgsqlCommand("SELECT getTotalBalance(@uid)", connection))
                 {
                     cmd.Parameters.AddWithValue("@uid", userId);
-                    var result = cmd.ExecuteScalar(); // Tek bir değer dönecek
+                    var result = cmd.ExecuteScalar();
                     if (result != DBNull.Value)
                     {
                         totalBalance = Convert.ToDecimal(result);
                     }
                 }
 
-                // 2. CÜZDANLARI LİSTELE (Bakiyesi 0'dan büyük olanları getir)
-                // Currency tablosuyla JOIN yaparak para birimi kodunu (USD, TRY) alıyoruz.
+                //List wallets who have money
                 string walletSql = @"
                     SELECT w.*, c.""currencyCode""
                     FROM ""Wallet"" w
                     JOIN ""Currency"" c ON w.""currencyId"" = c.""currencyId""
                     WHERE w.""userId"" = @uid AND (w.""balance"" > 0 OR w.""pendingBalance"" > 0)
-                    LIMIT 3"; // Sadece ilk 3 tanesini gösterelim (Özet)
+                    LIMIT 3"; //Display just top three
 
                 using (var cmd = new NpgsqlCommand(walletSql, connection))
                 {
@@ -77,7 +75,6 @@ public class HomeController : Controller
             ViewBag.Error = "Veri çekilirken hata oluştu: " + ex.Message;
         }
 
-        // Verileri View'a taşıyoruz
         ViewBag.TotalBalance = totalBalance;
         ViewBag.Currency = HttpContext.Session.GetString("UserCurrency") ?? "USD";
         

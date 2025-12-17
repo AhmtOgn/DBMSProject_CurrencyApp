@@ -14,10 +14,8 @@ namespace CurrencyApp.Controllers
             _dbHelper = dbHelper;
         }
 
-        // 1. PİYASALARI LİSTELE
         public IActionResult Index()
         {
-            // Giriş kontrolü
             if (HttpContext.Session.GetInt32("UserId") == null) return RedirectToAction("Login", "Account");
 
             List<CurrencyPair> pairs = new List<CurrencyPair>();
@@ -27,9 +25,6 @@ namespace CurrencyApp.Controllers
                 using (var connection = _dbHelper.GetConnection())
                 {
                     connection.Open();
-
-                    // SQL JOIN: Currency tablosuna iki kere bağlanıyoruz (Biri Base, Biri Target için)
-                    // Böylece ID'ler yerine 'USD', 'TRY' gibi kodları alabiliyoruz.
                     string sql = @"
                         SELECT cp.*, 
                                c1.""currencyCode"" as BaseCode, 
@@ -51,8 +46,7 @@ namespace CurrencyApp.Controllers
                                     Rate = reader.GetDecimal(reader.GetOrdinal("rate")),
                                     BaseCurrencyId = reader.GetInt32(reader.GetOrdinal("baseCurrencyId")),
                                     TargetCurrencyId = reader.GetInt32(reader.GetOrdinal("targetCurrencyId")),
-                                    
-                                    // Join ile gelen verileri elle eşleştiriyoruz
+
                                     BaseCurrencyCode = reader.GetString(reader.GetOrdinal("BaseCode")),
                                     TargetCurrencyCode = reader.GetString(reader.GetOrdinal("TargetCode"))
                                 };
@@ -64,13 +58,12 @@ namespace CurrencyApp.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error loading markets: " + ex.Message;
+                ViewBag.Error = "ERROR:" + ex.Message;
             }
 
             return View(pairs);
         }
 
-        // 2. AL/SAT EKRANI (TRADE SCREEN)
         [HttpGet]
         public IActionResult Trade(int id)
         {
@@ -83,7 +76,6 @@ namespace CurrencyApp.Controllers
                 using (var connection = _dbHelper.GetConnection())
                 {
                     connection.Open();
-                    // Seçilen paritenin detaylarını çek
                     string sql = @"
                         SELECT cp.*, c1.""currencyCode"" as BaseCode, c2.""currencyCode"" as TargetCode
                         FROM ""CurrencyPair"" cp
@@ -114,7 +106,7 @@ namespace CurrencyApp.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Error: " + ex.Message;
+                ViewBag.Error = "ERROR: " + ex.Message;
             }
 
             if (selectedPair == null) return RedirectToAction("Index");
@@ -130,7 +122,7 @@ namespace CurrencyApp.Controllers
 
             if (amount <= 0)
             {
-                TempData["Error"] = "Amount must be greater than zero.";
+                TempData["ERROR"] = "Amount must be greater than zero.";
                 return RedirectToAction("Trade", new { id = currencyPairId });
             }
 
@@ -140,7 +132,6 @@ namespace CurrencyApp.Controllers
                 {
                     connection.Open();
 
-                    // SQL Fonksiyonunu Çağırıyoruz
                     string sql = "SELECT \"executeTradeF\"(@uid, @pid, @op::operation_type, @amt)";
 
                     using (var cmd = new NpgsqlCommand(sql, connection))
@@ -156,19 +147,17 @@ namespace CurrencyApp.Controllers
                 
                 TempData["Success"] = "Transaction completed successfully!";
                 
-                // DEĞİŞİKLİK BURADA: Başarılıysa Piyasalar Listesine (Index) dön
                 return RedirectToAction("Index");
             }
             catch (PostgresException ex)
             {
-                TempData["Error"] = "Transaction failed: " + ex.MessageText;
-                // Hata varsa işlem ekranında kal
+                TempData["ERROR"] = "Transaction failed: " + ex.MessageText;
+
                 return RedirectToAction("Trade", new { id = currencyPairId });
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "System error: " + ex.Message;
-                // Hata varsa işlem ekranında kal
                 return RedirectToAction("Trade", new { id = currencyPairId });
             }
         }
