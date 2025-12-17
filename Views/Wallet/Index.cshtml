@@ -4,6 +4,38 @@
     ViewData["Title"] = "My Wallets";
 }
 
+<div class="mb-4 text-end">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createWalletModal">
+        <i class="fa-solid fa-plus"></i> Create New Wallet
+    </button>
+</div>
+
+<div class="modal fade" id="createWalletModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-action="CreateWallet" method="post">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Currency Code (e.g. USD, EUR, TRY)</label>
+                        <input type="text" name="currencyCode" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label>Wallet Name</label>
+                        <input type="text" name="walletName" class="form-control" placeholder="My Savings" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold"><i class="fa-solid fa-wallet text-primary"></i> My Wallets</h2>
@@ -16,6 +48,10 @@
     @if (ViewBag.Error != null)
     {
         <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
     }
 
     <div class="row">
@@ -54,11 +90,20 @@
                                 </div>
                             }
                         </div>
-                        <div class="card-footer bg-light text-end">
+                        
+                        <div class="card-footer bg-light d-flex justify-content-between">
+                            <form asp-action="DeleteWallet" method="post" onsubmit="return confirm('Are you sure you want to delete this wallet?');">
+                                <input type="hidden" name="walletId" value="@wallet.WalletId" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </form>
+
                             <a asp-controller="Market" asp-action="Index" class="btn btn-sm btn-outline-primary">
                                 Go to Market <i class="fa-solid fa-arrow-right"></i>
                             </a>
                         </div>
+                        
                     </div>
                 </div>
             }

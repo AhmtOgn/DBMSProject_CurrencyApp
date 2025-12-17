@@ -60,7 +60,68 @@ namespace CurrencyApp.Controllers
                 ViewBag.Error = "ERROR:" + ex.Message;
             }
 
-            return View(myWallets);
+            return View(myWallets); 
+        }
+
+        [HttpPost]
+        public IActionResult CreateWallet(string currencyCode, string walletName)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Account");
+        
+            try
+            {
+                using (var connection = _dbHelper.GetConnection())
+                {
+                    connection.Open();
+                    string sql = @"SELECT ""createWalletF""(@uid, @code, @name)";
+                    
+                    using (var cmd = new NpgsqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@uid", userId);
+                        cmd.Parameters.AddWithValue("@code", currencyCode);
+                        cmd.Parameters.AddWithValue("@name", (object)walletName ?? DBNull.Value);
+                        
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                TempData["Success"] = "Wallet created successfully via DB Function!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("Index");
+        }
+        
+        [HttpPost]
+        public IActionResult DeleteWallet(int walletId)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login", "Account");
+        
+            try
+            {
+                using (var connection = _dbHelper.GetConnection())
+                {
+                    connection.Open();
+                    string sql = @"SELECT ""deleteWalletF""(@wid, @uid)";
+        
+                    using (var cmd = new NpgsqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@wid", walletId);
+                        cmd.Parameters.AddWithValue("@uid", userId);
+                        
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                TempData["Success"] = "Wallet deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("Index");
         }
     }
 }
