@@ -5,8 +5,38 @@
     ViewData["Title"] = "Transaction History";
 }
 
-<div class="container mt-4">
-    <h2 class="fw-bold mb-4"><i class="fa-solid fa-clock-rotate-left text-warning"></i> Transaction History</h2>
+    <div class="container mt-4">
+        <h2 class="fw-bold mb-4"><i class="fa-solid fa-clock-rotate-left text-warning"></i> Transaction History</h2>
+    
+        <div class="card mb-4 p-3 bg-light">
+        <form method="get" asp-action="Index">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label>Operation Type</label>
+                    <select name="searchType" class="form-select">
+                        <option value="">All</option>
+                        <option value="Deposit">Deposit</option>
+                        <option value="Withdrawal">Withdrawal</option>
+                        <option value="Buy">Buy</option>
+                        <option value="Sell">Sell</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Start Date</label>
+                    <input type="date" name="startDate" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label>End Date</label>
+                    <input type="date" name="endDate" class="form-control" />
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-magnifying-glass"></i> Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 
     <div class="card shadow-sm">
         <div class="card-body p-0">
